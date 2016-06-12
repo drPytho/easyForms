@@ -6,17 +6,17 @@ import (
 	"net/http"
 )
 
-func GetFormHandler(m MailGun) func(http.ResponseWriter, *http.Request) {
+func GetFormHandler(m MailGun) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//TODO add spam filter here
 
 		decoder := json.NewDecoder(r.Body)
-		var data map[string]string
-		if err := decoder.Decode(data); err != nil {
+		data := make(map[string]string)
+		if err := decoder.Decode(&data); err != nil {
 			// Error while parsing
 			log.Println("Error while parsing requests body")
 			// Maybe print som details
-			log.Print("Error from JSON encoder \n ", err.Error, "\n\n", "Body: \n", decoder.Buffered())
+			log.Printf("Error from JSON encoder \n%s \nBody: %s", err.Error(), decoder.Buffered())
 			return
 		}
 		//TODO: Escape user data

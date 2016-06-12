@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"net/http"
 )
 
 var (
@@ -34,6 +35,7 @@ func main() {
 	fmg := SetupFMG(email, password, host, port)
 
 	if testMail {
+		log.Println("Testing mail setting")
 		// Test the mail interface
 		s := CreateSimpleMail()
 		s.SetHeader("From", email)
@@ -42,10 +44,13 @@ func main() {
 
 		if err := fmg.SendMail(s); err != nil {
 			// Woppsie
+			log.Println("Errored when sending mail")
 			log.Println(err.Error())
 			return
 		}
 		log.Println("Email was sent successfully")
 	}
+
+	http.ListenAndServe(":4000", GetFormHandler(fmg))
 
 }
