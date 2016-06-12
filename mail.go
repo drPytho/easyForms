@@ -20,6 +20,13 @@ type SimpleMail struct {
 	body    string
 }
 
+func CreateSimpleMail() *SimpleMail {
+	return &SimpleMail{
+		make(map[string]string),
+		"",
+	}
+}
+
 func (sm *SimpleMail) SetHeader(key, val string) {
 	sm.Headers[key] = val
 }
@@ -62,7 +69,8 @@ func SetupFMG(userEmail, password, host, port string) *FixedMailGun {
 func (mg *FixedMailGun) SendMail(msg Mail) error {
 	msg.SetHeader("To", mg.UserEmail)
 	var from string
-	if from, ok := msg.GetHeader("From"); !ok {
+	var ok bool
+	if from, ok = msg.GetHeader("From"); !ok {
 		from = mg.UserEmail
 	}
 	return smtp.SendMail(mg.Host+":"+mg.Port, mg.auth, from, []string{mg.UserEmail}, []byte(msg.getMail()))
