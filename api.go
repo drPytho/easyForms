@@ -2,9 +2,19 @@ package main
 
 import (
 	"encoding/json"
+	"html"
 	"log"
 	"net/http"
+	"regexp"
 )
+
+var (
+	re = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+)
+
+func isEmail(email string) bool {
+	return re.MatchString(email)
+}
 
 func GetFormHandler(m MailGun) http.HandlerFunc {
 	// Number of allowed messages per client IP address
@@ -25,12 +35,14 @@ func GetFormHandler(m MailGun) http.HandlerFunc {
 			log.Printf("Error from JSON encoder \n%s \nBody: %s", err.Error(), decoder.Buffered())
 			return
 		}
-		//TODO: Escape user data
 		s := CreateSimpleMail()
 		for k := range data {
 			if k == "email" || k == "Email" {
-				s.SetHeader("From", data[k])
-				s.SetHeader("Reply-To", data[k])
+				// Email should be email
+				if isEmail(data[k]) {
+					s.SetHeader("From", data[k])
+					s.SetHeader("Reply-To", data[k])
+				}
 			}
 		}
 		s.SetHeader("MIME-Version", "1.0")
@@ -40,7 +52,7 @@ func GetFormHandler(m MailGun) http.HandlerFunc {
 		//Build message here
 		bodyMsg += "<h3>User message</h3>"
 		for k, v := range data {
-			bodyMsg += "<b>" + k + "</b>: " + v + "<br><hr>\n"
+			bodyMsg += "<b>" + html.EscapeString(k) + "</b>: " + html.EscapeString(v) + "<br><hr>\n"
 		}
 		bodyMsg += "</body></html>"
 		s.SetBody(bodyMsg)
