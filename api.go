@@ -7,9 +7,15 @@ import (
 )
 
 func GetFormHandler(m MailGun) http.HandlerFunc {
+	// Number of allowed messages per client IP address
+	spam := CreateSpamFilter(50)
 	return func(w http.ResponseWriter, r *http.Request) {
 		//TODO add spam filter here
-
+		if !spam.OK(r.RemoteAddr) {
+			// This person has sent a message more than 50 times
+			log.Println("I belive we have cought ourselve a spammer. IP: ", r.RemoteAddr)
+			return
+		}
 		decoder := json.NewDecoder(r.Body)
 		data := make(map[string]string)
 		if err := decoder.Decode(&data); err != nil {
@@ -29,6 +35,7 @@ func GetFormHandler(m MailGun) http.HandlerFunc {
 		}
 		s.SetHeader("MIME-Version", "1.0")
 		s.SetHeader("Content-Type", "text/html")
+		s.SetHeader("Subject", "Message from contact form")
 		bodyMsg := "<html><body>"
 		//Build message here
 		bodyMsg += "<h3>User message</h3>"
