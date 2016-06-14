@@ -5,7 +5,7 @@ Easy forms is a simple Go service that can be used to submit website forms to yo
 
 ## Usage
 ```bash
-go build *.go -o easyForms
-./easyForms -host="smtp.mailserver.se" -email="name@mailserver.se" -password="SuperSecret" -port="25"
+$ go build *.go -o easyForms
+$ ./easyForms -host="smtp.mailserver.se" -email="name@mailserver.se" -password="SuperSecret" -port="25"
 ```
 
